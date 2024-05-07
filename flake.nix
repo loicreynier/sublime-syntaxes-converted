@@ -14,6 +14,7 @@
       devShells.default = pkgs.mkShell {
         inherit (self.checks.${system}.pre-commit-check) shellHook;
         packages = with pkgs; [
+          gnused
           # (callPackage ./nix {})
         ];
       };
@@ -29,6 +30,7 @@
             editorconfig-checker.enable = true;
             markdownlint.enable = true;
             prettier.enable = true;
+            shellcheck.enable = true;
             statix.enable = true;
             typos.enable = true;
           };
