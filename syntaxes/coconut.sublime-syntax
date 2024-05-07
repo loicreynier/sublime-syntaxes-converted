@@ -1,0 +1,1116 @@
+%YAML 1.2
+---
+# http://www.sublimetext.com/docs/3/syntax.html
+name: Coconut
+comment: |
+  Copyright (C) 2013 - 2014 Peter Varo
+          <http://github.com/petervaro/python>
+          Copyright (C) 2016 Evan Hubinger
+          <http://github.com/evhub/sublime-coconut>
+
+          This program is free software: you can redistribute it
+          and/or modify it under the terms of the GNU General
+          Public License as published by the Free Software
+          Foundation, either version 3 of the License, or (at your
+          option) any later version.
+
+          This program is distributed in the hope that it will be
+          useful, but WITHOUT ANY WARRANTY; without even the
+          implied warranty of MERCHANTABILITY or FITNESS FOR A
+          PARTICULAR PURPOSE. See the GNU General Public License
+          for more details.
+
+          You should have received a copy of the GNU General Public
+          License along with this program, most likely a file in
+          the root directory, called "LICENSE". If not, see
+          <http://www.gnu.org/licenses>.
+file_extensions:
+  - coc
+  - coco
+  - coconut
+  - py_template
+first_line_match: '^#!/.*\bcoconut[\d.-]*\b'
+scope: source.coconut
+contexts:
+  main:
+    - include: comment
+    - match: '\b0b[01_]+'
+      scope: constant.numeric.integer.binary.coconut
+    - match: '\b0x[\h_]+'
+      scope: constant.numeric.integer.hexadecimal.coconut
+    - match: '\b0o[0-7_]+'
+      scope: constant.numeric.integer.octal.coconut
+    - match: '(?<!\.)(?<=\W|^)\.\d[\d_]*([eE][+-]?\d[\d_]*)?[iIjJ]?(?!\.)'
+      scope: constant.numeric.float_and_complex.decimal.floatnumber.coconut
+    - match: '\d[\d_]*\.([\d_]*([eE][+-]?\d[\d_]*)?)?[iIjJ]?(?=\W)(?!\.)'
+      scope: constant.numeric.float_and_complex.decimal.pointfloat.coconut
+    - match: '(?<![\.\d_])\d[\d_]*[eE][+-]?\d[\d_]*[iIjJ]?'
+      scope: constant.numeric.float_and_complex.decimal.exponent.coconut
+    - match: '\b(?<!\.)([1-9][\d_]*|0)[iIjJ]?'
+      scope: constant.numeric.integer_and_complex.decimal.coconut
+    - match: \b(global|nonlocal)\b
+      scope: storage.modifier.declaration.coconut
+    - match: \b(async|await)\b
+      scope: storage.modifier.coroutine.coconut
+    - match: \b(import|from)\b
+      scope: keyword.control.import_and_import_from.coconut
+    - match: \b(elif|else|except|finally|for|if|try|while|with|break|continue|pass|raise|return|yield|(?<!\\)(match|cases?|where|then|operator))\b
+      scope: keyword.control.flow_block_delimiters.coconut
+    - match: \b(and|in|is|not|or)\b
+      scope: keyword.operator.bool.logical.coconut
+    - match: \b(as|assert|del|\?)\b
+      scope: keyword.other.coconut
+    - match: <=|>=|==|<(?!\*|\||:|\?)|>|!=|≠|≤|≥|¬=|⊆|⊇|⊊|⊋
+      scope: keyword.operator.comparison.coconut
+    - match: (\+|-|\*|\*\*|/|//|%|<<|>>|\^|~|@|::|\$|\|\??\*?\*?>|<\*?\*?\??\||<?\*?\*?\??\.\.\??\*?\*?>?|\?\??|\|→|⇒|\??\*?\*?↦|↤\*?\*?|<?\*?∘\*?>?|↑|÷|−|⁻|∧|∩|∨|∪|⊻|…|«|»|×|\||&|:)=
+      scope: keyword.operator.assignment.augmented.coconut
+    - match: \+|-|\*|\*\*|/|//|%|<<|>>|\^|~|@|::|\$|\|\??\*?\*?>|<\*?\*?\??\||`|&:|<?\*?\*?\??\.\.(?!\.)\??\*?\*?>?|\?\??|\|→|⇒|\??\*?\*?↦|↤\*?\*?|<?\*?∘\*?>?|↑|÷|−|⁻|∧|∩|∨|∪|⊻|…|«|»|×|\||&|->|=>
+      scope: keyword.operator.arithmetic.coconut
+    - match: ":?=|->|<:"
+      scope: keyword.operator.value_and_annotation_assignment.coconut
+    - match: '^\s*(class|(?<!\\)data)\s+(?=[a-zA-Z_]\w*(\s*\()?)'
+      captures:
+        1: storage.type.class.coconut
+      push:
+        - meta_scope: meta.class.coconut
+        - match: '\)?([ \t\r\f\v]+\w+)?[ \t\r\f\v]*(?::|=|(?=#|\n))'
+          captures:
+            1: entity.other.inherited-class.coconut
+          pop: true
+        - include: class_entity_name
+    - match: '^\s*((?:(?:async|match|addpattern|yield|copyclosure|case)\s+)*)(def)\s+(?=[a-zA-Z_][\w.]*\s*(?:\(|:|\[))|^\s*(case)\s*(?=\()|^\s*(type)\s*(?=\()'
+      captures:
+        1: storage.modifier.coroutine.coconut
+        2: storage.type.function.coconut
+        3: storage.type.function.coconut
+        4: storage.modifier.coroutine.coconut
+      push:
+        - meta_scope: meta.function.coconut
+        - match: \s*(:|=)
+          pop: true
+        - include: function_entity_name
+        - include: function_arguments
+        - include: function_annotation
+    - match: \b(lambda)\b
+      captures:
+        1: storage.type.function.anonymous.coconut
+      push:
+        - meta_scope: meta.function.anonymous.coconut
+        - match: ":"
+          pop: true
+        - match: \s+
+          push:
+            - match: (?=:)
+              pop: true
+            - match: '\b([a-zA-Z_]\w*)\s*(=)'
+              captures:
+                1: variable.parameter.function.coconut
+                2: keyword.operator.assignment.coconut
+              push:
+                - match: (?=,|:)
+                  pop: true
+                - include: main
+            - match: '\b[a-zA-Z_]\w*'
+              scope: variable.parameter.function.coconut
+    - match: "@"
+      scope: keyword.operator.arithmetic.coconut
+    - match: \b(None|True|False|Ellipsis|NotImplemented|TYPE_CHECKING)\b
+      scope: constant.language.word_like.coconut
+    - match: (?<=\W|^)\.\.\.(?=\W|$)
+      scope: constant.language.symbol_like.coconut
+    - match: \b((async|match|addpattern|yield|copyclosure|case)\s+)*(def|lambda)\b
+      scope: storage.type.function.coconut
+    - match: \b(class|(?<!\\)data)\b
+      scope: storage.type.class.coconut
+    - include: builtin_types
+    - include: builtin_functions
+    - include: builtin_exceptions
+    - include: magic_function_names
+    - include: magic_variable_names
+    - include: language_variables
+    - match: '\['
+      push:
+        - meta_scope: meta.structure.list.coconut
+        - match: '\]'
+          pop: true
+        - match: '(?<=\[|,|;)\s*(?![\],;])'
+          push:
+            - match: '\s*(?:,|;+|(?=\]))'
+              pop: true
+            - include: main
+    - match: '([sSfFmM])?\{'
+      captures:
+        1: storage.type.string.prefix.coconut
+      push:
+        - meta_scope: meta.structure.dictionary.coconut
+        - match: '\}'
+          pop: true
+        - match: '(?<=\{|,|^)\s*(?![,}])'
+          push:
+            - match: '\s*(?:(?=\})|:)'
+              pop: true
+            - include: main
+        - match: (?<=:|^)\s*
+          push:
+            - match: '\s*(?:(?=\})|,)'
+              pop: true
+            - include: main
+    - match: (?<=,|;|=|\+|-|\*|/|\||:|<|>|~|%|\^|\\|@|`|\\)\s*\(
+      push:
+        - meta_scope: meta.structure.group.coconut
+        - match: \)
+          pop: true
+        - include: main
+    - match: '(?<!:|,|;|\[|\{|\}|=|\+|-|\*|/|\||<|>|~|%|\^|\\|\n|@|`|\\)\s*\$?\('
+      push:
+        - meta_scope: meta.function_call.coconut
+        - match: \)
+          pop: true
+        - include: keyword_arguments
+        - include: main
+    - include: f_string_quoted
+    - include: string_quoted_regex
+    - include: string_quoted
+  comment:
+    - include: comment_extended_re
+    - include: comment_extended_old
+    - include: comment_extended_fmt
+    - include: comment_extended_tmp
+    - match: '#.*$\n?'
+      scope: comment.line.hashmark.coconut
+  builtin_exceptions:
+    - match: \b((Arithmetic|Buffer|Lookup|Assertion|Attribute|EOF|FloatingPoint|Import|Index|Key|Memory|Name|NotImplemented|OS|Overflow|Reference|Runtime|Syntax|Indentation|Tab|System|Type|UnboundLocal|Unicode(Encode|Decode|Translate)?|Value|ZeroDivision|Environment|IO|VMS|Windows|BlockingIO|ChildProcess|BrokenPipe|Connection(Aborted|Refused|Reset)?|FileExists|FileNotFound|Interrupted|(Is|Not)ADirectory|Permission|ProcessLookup|Timeout)Error|(User|Deprecation|PendingDeprecation|Syntax|Runtime|Future|Import|Bytes|Resource)Warning|(Base)?Exception|(Generator|System)Exit|KeyboardInterrupt|Stop(Async)?Iteration|(Coconut)?Warning|MatchError)\b
+      scope: support.type.exception.coconut
+  builtin_functions:
+    - match: (?<!(?<!\.)\.)\b(__import__|abs|all|any|ascii|bin|callable|(py_)?chr|compile|delattr|dir|divmod|eval|exec|format|getattr|globals|hasattr|hash|vars|help|(py_)?hex|id|(py_)?input|isinstance|issubclass|iter|len|locals|(py_)?min|next|oct|ord|pow|(py_)?print|repr|round|setattr|sorted|sum|(py_)?max|reduce|takewhile|dropwhile|tee|makedata|consume|py_raw_input|py_xrange|addpattern|recursive_generator|memoize|fmap|_namedtuple_of|collectby|(py_)?breakpoint|override|ident|call|safe_call|all_equal|mapreduce)\b
+      scope: support.function.builtin.coconut
+  builtin_types:
+    - match: (?<!(?<!\.)\.)\b(bool|bytearray|(py_)?bytes|classmethod|complex|dict|(py_)?range|tuple|(py_)?open|(py_)?enumerate|float|frozenset|(py_)?int|list|memoryview|(py_)?object|property|(py_)?reversed|set|slice|staticmethod|(py_)?str|(py_)?super|type|(py_)?map|(py_)?zip|(process|thread|async)_map|count|starmap|zip_longest|multi_enumerate|cartesian_product|reiterable|scan|groupsof|Expected|flip|const|lift(_apart)?|flatten|(py_)?filter|multiset|cycle|windowsof|and_then(_await)?)\b
+      scope: support.type.coconut
+  class_entity_name:
+    - match: '(?=[a-zA-Z_]\w*)'
+      push:
+        - meta_content_scope: entity.name.type.class.coconut
+        - match: (?!\w)\s*(\bfrom\b)?
+          captures:
+            1: storage.type.class.coconut
+          pop: true
+        - include: entity_name_class
+  class_inheritance:
+    - match: \(
+      push:
+        - meta_content_scope: meta.class.inheritance.coconut
+        - match: \)(\s*\bfrom\b)?|\s*(?=:|=|\n|#)
+          captures:
+            1: storage.type.class.coconut
+          pop: true
+        - match: (?<=\(|,)\s*
+          push:
+            - meta_content_scope: entity.other.inherited-class.coconut
+            - match: \s*(?:,|(?=\)))
+              captures:
+                1: punctuation.separator.inheritance.coconut
+              pop: true
+            - include: main
+  comment_extended_fmt:
+    - match: (?i)(#(#|\s)*syntax:fmt)$
+      captures:
+        1: comment.line.hashmark.extended.fmt.open.coconut
+      push:
+        - meta_scope: meta.syntax.comment.line.hashmark.extended.fmt.coconut
+        - match: (?i)(#(#|\s)*end:fmt)$
+          captures:
+            1: comment.line.hashmark.extended.fmt.close.coconut
+          pop: true
+        - include: string_quoted_format
+        - include: main
+  comment_extended_old:
+    - match: (?i)(#(#|\s)*syntax:old)$
+      captures:
+        1: comment.line.hashmark.extended.fmt.open.coconut
+      push:
+        - meta_scope: meta.syntax.comment.line.hashmark.extended.fmt.coconut
+        - match: (?i)(#(#|\s)*end:old)$
+          captures:
+            1: comment.line.hashmark.extended.fmt.close.coconut
+          pop: true
+        - include: string_quoted_old
+        - include: main
+  comment_extended_re:
+    - match: (?i)(#(#|\s)*syntax:re)$
+      captures:
+        1: comment.line.hashmark.extended.re.open.coconut
+      push:
+        - meta_scope: meta.syntax.comment.line.hashmark.extended.re.coconut
+        - match: (?i)(#(#|\s)*end:re)$
+          captures:
+            1: comment.line.hashmark.extended.re.close.coconut
+          pop: true
+        - include: string_quoted_regex
+        - include: main
+  comment_extended_tmp:
+    - match: (?i)(#(#|\s)*syntax:tmp)$
+      captures:
+        1: comment.line.hashmark.extended.tmp.open.coconut
+      push:
+        - meta_scope: meta.syntax.comment.line.hashmark.extended.tmp.coconut
+        - match: (?i)(#(#|\s)*end:tmp)$
+          captures:
+            1: comment.line.hashmark.extended.tmp.close.coconut
+          pop: true
+        - include: string_quoted_template
+        - include: main
+  constant_placeholder:
+    - match: '%(\(\w+\))?#?0?-?[ ]?\+?(\d*|\*)(\.(\d*|\*))?[hlL]?[diouxXeEfFgGcrs%]'
+      scope: string.interpolated.placeholder.coconut
+  entity_name_class:
+    - include: illegal_names
+    - include: generic_names
+  entity_name_function:
+    - include: magic_function_names
+    - include: illegal_names
+    - include: generic_names
+  escaped_characters:
+    - match: '\\(x\h{2}|[0-7]{3}|\n|\"|\''|a|b|f|n|r|t|v|\\)'
+      scope: constant.character.escaped.special.coconut
+  escaped_characters_raw:
+    - match: \\(\'|")
+      scope: constant.character.escaped.raw.special.coconut
+  escaped_unicode_characters:
+    - match: '\\(u\h{4}|U\h{8}|N\{[a-zA-Z\s]+\})'
+      scope: constant.character.escaped.coconut
+  f_string_quoted:
+    - match: "([fF])'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: string_patterns
+        - include: format_specifier_extended
+    - match: "([rR][fF]|[fF][rR])'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier_extended
+    - match: "([fF])'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: format_specifier_extended
+    - match: "([rR][fF]|[fF][rR])'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier_extended
+    - match: '([fF])"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: string_patterns
+        - include: format_specifier_extended
+    - match: '([rR][fF]|[fF][rR])"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier_extended
+    - match: '([fF])"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: format_specifier_extended
+    - match: '([rR][fF]|[fF][rR])"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier_extended
+  format_escape:
+    - match: "({{|}})"
+      scope: constant.character.escape.fmt.coconut
+  format_specifier:
+    - include: format_escape
+    - match: '({)(\w*(\.\w+)*)?(!(a|r|s))?'
+      captures:
+        1: string.interpolated.brace.fmt.coconut
+        2: variable.parameter.subscriptor.fmt.coconut
+        4: keyword.operator.exclamation.fmt.coconut
+        5: support.constant.ascii_repr_str.fmt.coconut
+      push:
+        - meta_scope: meta.interpolated.format.string.coconut
+        - match: "(})"
+          captures:
+            1: string.interpolated.brace.fmt.coconut
+          pop: true
+        - match: (:)
+          captures:
+            1: keyword.operator.colon.fmt.coconut
+          push:
+            - meta_scope: meta.interpolated.format.specifier.coconut
+            - match: "(?=})"
+              pop: true
+            - include: format_specifier_fill_align
+            - include: format_specifier_sign
+            - include: format_specifier_alternate_form
+            - include: format_specifier_zero_padding
+            - include: format_specifier_width
+            - include: format_specifier_thousand_separator
+            - include: format_specifier_precision
+            - include: format_specifier_type
+            - include: format_specifier
+        - include: format_specifier
+  format_specifier_alternate_form:
+    - match: (#)
+      captures:
+        1: support.constant.alternate.fmt.coconut
+      push:
+        - meta_scope: meta.alternate.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_zero_padding
+        - include: format_specifier_width
+        - include: format_specifier_thousand_separator
+        - include: format_specifier_precision
+        - include: format_specifier_type
+        - include: format_specifier
+  format_specifier_extended:
+    - include: format_escape
+    - match: "({)"
+      captures:
+        1: string.interpolated.brace.fmt.coconut
+      push:
+        - meta_scope: meta.interpolated.format.fstring.coconut
+        - match: "(})"
+          captures:
+            1: string.interpolated.brace.fmt.coconut
+          pop: true
+        - include: format_specifier_extended_self
+        - include: format_specifier_extended_ascii_repr_str
+        - include: format_specifier_extended_colon
+        - include: format_specifier_extended_fill_align
+        - include: format_specifier_extended_sign
+        - include: format_specifier_extended_alternate_form
+        - include: format_specifier_extended_zero_padding
+        - include: format_specifier_extended_width
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_alternate_form:
+    - match: (#)
+      captures:
+        1: support.constant.alternate.fmt.coconut
+      push:
+        - meta_scope: meta.alternate.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_zero_padding
+        - include: format_specifier_extended_width
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_ascii_repr_str:
+    - match: (!(a|r|s))
+      captures:
+        1: keyword.operator.exclamation.fmt.coconut
+        2: support.constant.ascii_repr_str.fmt.coconut
+      push:
+        - meta_scope: meta.ascii_repr_str.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_colon
+        - include: format_specifier_extended_fill_align
+        - include: format_specifier_extended_sign
+        - include: format_specifier_extended_alternate_form
+        - include: format_specifier_extended_zero_padding
+        - include: format_specifier_extended_width
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_colon:
+    - match: (:)
+      captures:
+        1: keyword.operator.colon.fmt.coconut
+      push:
+        - meta_scope: meta.colon.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_fill_align
+        - include: format_specifier_extended_sign
+        - include: format_specifier_extended_alternate_form
+        - include: format_specifier_extended_zero_padding
+        - include: format_specifier_extended_width
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_fill_align:
+    - match: '([^{}]?(<|>|=|\^))'
+      captures:
+        1: string.quoted.fill_char.fmt.coconut
+        2: keyword.operator.align.fmt.coconut
+      push:
+        - meta_scope: meta.fill_char.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_sign
+        - include: format_specifier_extended_alternate_form
+        - include: format_specifier_extended_zero_padding
+        - include: format_specifier_extended_width
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_precision:
+    - match: (\.\d+)
+      captures:
+        1: constant.character.precision.fmt.coconut
+      push:
+        - meta_scope: meta.precision.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_self:
+    - match: "(?<={)"
+      push:
+        - meta_scope: meta.self.coconut
+        - match: "(?=!|:|})"
+          pop: true
+        - include: main
+  format_specifier_extended_sign:
+    - match: (\+|-|\s)
+      captures:
+        1: keyword.operator.sign.fmt.coconut
+      push:
+        - meta_scope: meta.sign.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_alternate_form
+        - include: format_specifier_extended_zero_padding
+        - include: format_specifier_extended_width
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_thousand_separator:
+    - match: (,)
+      captures:
+        1: keyword.operator.thousand_separator.fmt.coconut
+      push:
+        - meta_scope: meta.thousand_separator.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_type:
+    - match: (b|c|d|e|E|f|F|g|G|n|o|s|x|X|%)
+      captures:
+        1: constant.character.escape.type.fmt.coconut
+      push:
+        - meta_scope: meta.type.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended
+  format_specifier_extended_width:
+    - match: (\d+)
+      captures:
+        1: constant.character.width.fmt.coconut
+      push:
+        - meta_scope: meta.width.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_extended_zero_padding:
+    - match: (0)
+      captures:
+        1: constant.character.escape.zero_padding.fmt.coconut
+      push:
+        - meta_scope: meta.zero_padding.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_extended_width
+        - include: format_specifier_extended_thousand_separator
+        - include: format_specifier_extended_precision
+        - include: format_specifier_extended_type
+        - include: format_specifier_extended
+  format_specifier_fill_align:
+    - match: '([^{}]?(<|>|=|\^))'
+      captures:
+        1: string.quoted.fill_char.fmt.coconut
+        2: keyword.operator.align.fmt.coconut
+      push:
+        - meta_scope: meta.fill_char.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_sign
+        - include: format_specifier_alternate_form
+        - include: format_specifier_zero_padding
+        - include: format_specifier_width
+        - include: format_specifier_thousand_separator
+        - include: format_specifier_precision
+        - include: format_specifier_type
+        - include: format_specifier
+  format_specifier_precision:
+    - match: (\.\d+)
+      captures:
+        1: constant.character.precision.fmt.coconut
+      push:
+        - meta_scope: meta.precision.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_type
+        - include: format_specifier
+  format_specifier_sign:
+    - match: (\+|-|\s)
+      captures:
+        1: keyword.operator.sign.fmt.coconut
+      push:
+        - meta_scope: meta.sign.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_alternate_form
+        - include: format_specifier_zero_padding
+        - include: format_specifier_width
+        - include: format_specifier_thousand_separator
+        - include: format_specifier_precision
+        - include: format_specifier_type
+        - include: format_specifier
+  format_specifier_thousand_separator:
+    - match: (,)
+      captures:
+        1: keyword.operator.thousand_separator.fmt.coconut
+      push:
+        - meta_scope: meta.thousand_separator.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_precision
+        - include: format_specifier_type
+        - include: format_specifier
+  format_specifier_type:
+    - match: (b|c|d|e|E|f|F|g|G|n|o|s|x|X|%)
+      captures:
+        1: constant.character.escape.type.fmt.coconut
+      push:
+        - meta_scope: meta.type.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier
+  format_specifier_width:
+    - match: (\d+)
+      captures:
+        1: constant.character.width.fmt.coconut
+      push:
+        - meta_scope: meta.width.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_thousand_separator
+        - include: format_specifier_precision
+        - include: format_specifier_type
+        - include: format_specifier
+  format_specifier_zero_padding:
+    - match: (0)
+      captures:
+        1: constant.character.escape.zero_padding.fmt.coconut
+      push:
+        - meta_scope: meta.zero_padding.fmt.coconut
+        - match: "(?=})"
+          pop: true
+        - include: format_specifier_width
+        - include: format_specifier_thousand_separator
+        - include: format_specifier_precision
+        - include: format_specifier_type
+        - include: format_specifier
+  function_annotation:
+    - match: \s*(->)\s*
+      captures:
+        1: keyword.operator.annotation.assignment.coconut
+      push:
+        - match: '(?=\s*[:=])'
+          pop: true
+        - include: main
+  function_arguments:
+    - match: \(
+      push:
+        - match: (?=\))
+          pop: true
+        - include: comment
+        - match: '\b([a-zA-Z_]\w*)\s*(?:\([^)]*\)\s*)?(=|`)'
+          captures:
+            1: variable.parameter.function.coconut
+            2: keyword.operator.assignment.coconut
+          push:
+            - match: '(?=[,\n)])'
+              pop: true
+            - match: (?<=(=|`))\s*
+              captures:
+                1: keyword.operator.assignment.coconut
+              push:
+                - match: '(?=[,\n)])'
+                  pop: true
+                - include: main
+            - match: \s*\b(?=<?:|\+|\w)
+              push:
+                - match: '(?=(=|`)|[,\n)])'
+                  captures:
+                    1: keyword.operator.assignment.coconut
+                  pop: true
+                - include: main
+        - match: '\b([a-zA-Z_]\w*)\s*(?:\([^)]*\)\s*)?'
+          captures:
+            1: variable.parameter.function.coconut
+          push:
+            - match: '(?=[,\n()])'
+              pop: true
+            - match: \s*\b(?=<?:|\+|\w)
+              push:
+                - match: '(?=[,\n)])'
+                  pop: true
+                - include: main
+  function_entity_name:
+    - match: '(?=[a-zA-Z_]\w*)'
+      push:
+        - meta_content_scope: entity.name.function.coconut
+        - match: (?!\w)
+          pop: true
+        - include: entity_name_function
+  generic_names:
+    - match: '[a-zA-Z_]\w*'
+  illegal_names:
+    - match: \b(and|as|assert|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield|_coconut\w*)\b
+      scope: invalid.illegal_names.name.coconut
+  keyword_arguments:
+    - match: '\b([a-zA-Z_]\w*)\s*(=)(?!=)'
+      captures:
+        1: variable.parameter.function.coconut
+        2: keyword.operator.assignment.coconut
+      push:
+        - match: '(?=[,\n)])'
+          pop: true
+        - include: main
+  language_variables:
+    - match: \b(self|cls)\b
+      scope: variable.language.coconut
+  magic_function_names:
+    - match: \b__(abs|add|and|await|bool|bytes|call|ceil|complex|contains|copy|deepcopy|del|delattr|delete|delitem|dir|div|divmod|a?enter|eq|a?exit|float|floor|floordiv|format|ge|get|getattr|getattribute|getinitargs|getitem|getnewargs|getstate|gt|hash|hex|iadd|iand|idiv|ifloordiv|ilshift|imul|index|init|instancecheck|int|invert|ior|ipow|irshift|isub|a?iter|itruediv|ixor|le|len|lshift|lt|metaclass|missing|mod|mul|ne|neg|new|a?next|oct|or|pos|pow|prepare|radd|rand|rdiv|rdivmod|reduce|reduce_ex|repr|reversed|rfloordiv|rlshift|rmod|rmul|ror|round|rpow|rrshift|rshift|rsub|rtruediv|rxor|set|setattr|setitem|setstate|sizeof|str|sub|subclasscheck|subclasshook|truediv|trunc|unicode|weakref|xor|matmul|fmap|set_name|iter_getitem)__\b
+      scope: support.function.magic.coconut
+  magic_variable_names:
+    - match: \b__(all|annotations|bases|builtins|class|debug|dict|doc|file|members|metaclass|mro|name|qualname|slots|weakref)__\b
+      scope: support.variable.magic.coconut
+  regular_expressions:
+    - match: '(?<=\()\?(=|!|<=|<!|:|P<[a-zA-Z_]\w*?>|\(([1-9]\d?|[a-zA-Z_]\w*)\))'
+      scope: constant.character.escape.coconut
+    - match: '\((\?P=)([a-zA-Z_]\w*)\)'
+      scope: keyword.other.group_reference_name.regex.coconut
+      captures:
+        1: constant.character.escape.coconut
+    - match: '(\\g)<([a-zA-Z_]\w*|[1-9]\d*)>'
+      scope: keyword.other.group_reference_name.regex.coconut
+      captures:
+        1: constant.character.escape.coconut
+    - match: '\\[bBAZzG]|\^|\$'
+      scope: keyword.control.anchor.regex.coconut
+    - match: '\\[1-9]\d*'
+      scope: keyword.other.group_reference_order.regex.coconut
+    - match: '[?+*][?+]?|\{(\d+,\d+|\d+,|,\d+|\d+)\}\??'
+      scope: keyword.operator.quantifier.regex.coconut
+    - match: \|
+      scope: keyword.operator.or.regex.coconut
+    - match: '\(\?#'
+      push:
+        - meta_scope: comment.block.regex.coconut
+        - match: \)
+          pop: true
+    - match: '\(\?[aiLmsux]+\)'
+      scope: keyword.other.option_toggle.regex.coconut
+    - include: regular_expressions_escaped_characters
+    - include: regular_expressions_character_classes
+    - match: "[()]"
+      scope: keyword.operator.group.regex.coconut
+  regular_expressions_character_classes:
+    - match: '\\[wWsSdD]|\.'
+      scope: constant.character.character_class.regex.coconut
+    - match: '\[(\^)?(\](?=.*\]))?'
+      captures:
+        1: keyword.operator.negation.regex.coconut
+      push:
+        - meta_scope: constant.other.character_class.set.regex.coconut
+        - match: '\]'
+          pop: true
+        - match: '\[|\\\\|\\\]'
+          scope: constant.character.escaped.special.regex.except.coconut
+        - include: regular_expressions_character_classes
+        - include: regular_expressions_escaped_characters
+  regular_expressions_escaped_characters:
+    - match: '\\(\\|\?|\.|\*|\+|\{|\}|\||\(|\)|\[|\]|\^|\$)'
+      scope: constant.character.escaped.special.regex.coconut
+  string_patterns:
+    - include: escaped_characters
+    - include: escaped_unicode_characters
+  string_quoted:
+    - match: "([bBuU]?)'''"
+      captures:
+        1: storage.type.string.prefix.coconut
+      push:
+        - meta_scope: string.quoted.single.block.coconut
+        - match: "'''"
+          pop: true
+        - include: string_patterns
+    - match: "([bBuU]?)'"
+      captures:
+        1: storage.type.string.prefix.coconut
+      push:
+        - meta_scope: string.quoted.single.line.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.coconut
+          pop: true
+        - include: string_patterns
+    - match: '([bBuU]?)"""'
+      captures:
+        1: storage.type.string.prefix.coconut
+      push:
+        - meta_scope: string.quoted.double.block.coconut
+        - match: '"""'
+          pop: true
+        - include: string_patterns
+    - match: '([bBuU]?)"'
+      captures:
+        1: storage.type.string.prefix.coconut
+      push:
+        - meta_scope: string.quoted.double.line.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.coconut
+          pop: true
+        - include: string_patterns
+  string_quoted_format:
+    - match: "([uUbB]?)'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: string_patterns
+        - include: format_specifier
+    - match: "([rR][bB]?|[bB][rR])'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier
+    - match: "([uUbB]?)'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: format_specifier
+    - match: "([rR][bB]?|[bB][rR])'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier
+    - match: '([uUbB]?)"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: string_patterns
+        - include: format_specifier
+    - match: '([rR][bB]?|[bB][rR])"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier
+    - match: '([uUbB]?)"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: format_specifier
+    - match: '([rR][bB]?|[bB][rR])"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: format_specifier
+  string_quoted_old:
+    - match: "([uUbB]?)'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: string_patterns
+        - include: constant_placeholder
+    - match: "([rR][bB]?|[bB][rR])'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: escaped_characters_raw
+        - include: constant_placeholder
+    - match: "([uUbB]?)'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: constant_placeholder
+    - match: "([rR][bB]?|[bB][rR])'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: constant_placeholder
+    - match: '([uUbB]?)"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: string_patterns
+        - include: constant_placeholder
+    - match: '([rR][bB]?|[bB][rR])"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: escaped_characters_raw
+        - include: constant_placeholder
+    - match: '([uUbB]?)"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: constant_placeholder
+    - match: '([rR][bB]?|[bB][rR])"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: constant_placeholder
+  string_quoted_regex:
+    - match: "([rR][bB]?|[bB][rR])'''"
+      captures:
+        1: storage.type.string.prefix.re.coconut
+      push:
+        - meta_scope: string.quoted.single.block.re.coconut
+        - match: "'''"
+          pop: true
+        - include: string_patterns
+        - include: regular_expressions
+        - include: comment
+    - match: "([rR][bB]?|[bB][rR])'"
+      captures:
+        1: storage.type.string.prefix.re.coconut
+      push:
+        - meta_scope: string.quoted.single.line.re.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.re.coconut
+          pop: true
+        - include: string_patterns
+        - include: regular_expressions
+    - match: '([rR][bB]?|[bB][rR])"""'
+      captures:
+        1: storage.type.string.prefix.re.coconut
+      push:
+        - meta_scope: string.quoted.double.block.re.coconut
+        - match: '"""'
+          pop: true
+        - include: string_patterns
+        - include: regular_expressions
+        - include: comment
+    - match: '([rR][bB]?|[bB][rR])"'
+      captures:
+        1: storage.type.string.prefix.re.coconut
+      push:
+        - meta_scope: string.quoted.double.line.re.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.re.coconut
+          pop: true
+        - include: string_patterns
+        - include: regular_expressions
+  string_quoted_template:
+    - match: "([uUbB]?)'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: string_patterns
+        - include: template_string
+    - match: "([rR][bB]?|[bB][rR])'''"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.block.fmt.coconut
+        - match: "'''"
+          pop: true
+        - include: escaped_characters_raw
+        - include: template_string
+    - match: "([uUbB]?)'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: template_string
+    - match: "([rR][bB]?|[bB][rR])'"
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.single.line.fmt.coconut
+        - match: '''|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: template_string
+    - match: '([uUbB]?)"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: string_patterns
+        - include: template_string
+    - match: '([rR][bB]?|[bB][rR])"""'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.block.fmt.coconut
+        - match: '"""'
+          pop: true
+        - include: escaped_characters_raw
+        - include: template_string
+    - match: '([uUbB]?)"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: string_patterns
+        - include: template_string
+    - match: '([rR][bB]?|[bB][rR])"'
+      captures:
+        1: storage.type.string.prefix.fmt.coconut
+      push:
+        - meta_scope: string.quoted.double.line.fmt.coconut
+        - match: '"|(\n)'
+          captures:
+            1: invalid.illegal.unclosed_string.fmt.coconut
+          pop: true
+        - include: escaped_characters_raw
+        - include: template_string
+  template_string:
+    - match: '\$(\$|[a-zA-Z_]\w*|{[a-zA-Z_]\w*})'
+      scope: string.interpolated.template.coconut

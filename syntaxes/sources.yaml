@@ -1,0 +1,10 @@
+---
+syntaxes:
+  coconut:
+    file: ./coconut.sublime-syntax
+    repo: https://github.com/evhub/sublime-coconut
+    rev: 2bf66d15322717284a6d101f99ec8b72c98c1c1d
+  cuda:
+    file: ./cuda-c++.sublime-syntax
+    repo: https://github.com/harrism/sublimetext-cuda-cpp
+    rev: 2bf66d15322717284a6d101f99ec8b72c98c1c1d
